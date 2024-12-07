@@ -4,10 +4,10 @@ import logging
 from typing import Any, Dict, Iterator, List, Optional, Union
 
 from anthropic import Anthropic
-from anthropic.types import Message
+from anthropic.types import Message, Usage
 
+from .types import ChatRequest
 from .models import MODEL_TYPES, TEXT_ONLY_MODELS
-from .types import ChatMessage, ChatRequest, Usage
 
 logger = logging.getLogger(__name__)
 
@@ -35,12 +35,12 @@ class Client:
             raise ConnectionError(f"Failed to initialize Claude client: {e}")
 
     def get_completion(self,
-                      messages: List[Union[Dict[str, Any], ChatMessage]],
+                      messages: List[Union[Dict[str, Any], Message]],
                       **kwargs) -> Union[Message, Iterator[str]]:
         """Get completion from Claude"""
         # Convert dict messages to ChatMessage if needed
         processed_messages = [
-            m if isinstance(m, ChatMessage) else ChatMessage(**m)
+            m if isinstance(m, Message) else Message(**m)
             for m in messages
         ]
 
@@ -63,7 +63,7 @@ class Client:
         """Make synchronous API call"""
         response = self.client.messages.create(**request)
         if self.usage_log is not None:
-            self.usage_log.append(Usage(**response.usage.dict()))
+            self.usage_log.append(Usage(**response.usage.model_dump()))
         return response
 
     def _stream_response(self, request: Dict[str, Any]) -> Iterator[str]:
@@ -72,4 +72,4 @@ class Client:
             for chunk in stream.text_stream:
                 yield chunk
             if self.usage_log is not None:
-                self.usage_log.append(Usage(**stream.get_final_message().usage.dict()))
+                self.usage_log.append(Usage(**stream.get_final_message().usage.model_dump()))
