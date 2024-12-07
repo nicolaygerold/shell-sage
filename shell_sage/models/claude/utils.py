@@ -1,6 +1,8 @@
 import abc
-from anthropic.types import TextBlock
 from functools import partial
+
+from anthropic.types import TextBlock
+
 
 def noop(x): return x
 

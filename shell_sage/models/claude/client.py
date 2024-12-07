@@ -1,16 +1,11 @@
-from typing import Optional, List, Dict, Any, Union, Iterator
 import logging
+from typing import Any, Dict, Iterator, List, Optional, Union
+
 from anthropic import Anthropic
 from anthropic.types import Message
 
-from .types import (
-    ToolChoice,
-    ToolResult,
-    Usage,
-    ChatMessage,
-    ChatRequest
-)
 from .models import MODEL_TYPES, PRICING, TEXT_ONLY_MODELS
+from .types import ChatMessage, ChatRequest, ToolChoice, ToolResult, Usage
 
 logger = logging.getLogger(__name__)
 

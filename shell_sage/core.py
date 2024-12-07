@@ -1,16 +1,19 @@
-from dataclasses import dataclass
-from typing import Optional, List
-import typer
-import sys
-from functools import partial
-from rich.console import Console
-from rich.markdown import Markdown
 import logging
 import os
 import subprocess
-from .models.claude import Client, MODEL_TYPES, contents
+import sys
+from dataclasses import dataclass
+from functools import partial
+from typing import List, Optional
+
+import typer
+from rich.console import Console
+from rich.markdown import Markdown
+
+from .models.claude import MODEL_TYPES, Client, contents
 from .pane import get_history
 from .prompts import sp, ssp
+
 
 @dataclass
 class ShellSageConfig:

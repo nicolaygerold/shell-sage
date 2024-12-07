@@ -1,6 +1,7 @@
 import subprocess
 from subprocess import check_output as co
-from typing import Optional, List
+from typing import List, Optional
+
 
 def get_pane_output(num_lines: int, pane_id: Optional[str] = None) -> str:
     """Get output from a tmux pane
