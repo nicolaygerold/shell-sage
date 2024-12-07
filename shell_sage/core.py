@@ -9,7 +9,7 @@ import logging
 import os
 import subprocess
 from .models.claude import Client, MODEL_TYPES, contents
-from .tmux import get_history
+from .pane import get_history
 from .prompts import sp, ssp
 
 @dataclass
