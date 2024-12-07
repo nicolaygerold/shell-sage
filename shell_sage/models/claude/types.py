@@ -1,6 +1,8 @@
+"""Types for Claude API."""
+
 from typing import Any, Dict, List, Literal, Optional, Union
 
-from anthropic.types import Message, Usage
+from anthropic.types import Usage
 from pydantic import BaseModel, Field, validator
 
 

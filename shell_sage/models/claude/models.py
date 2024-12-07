@@ -1,3 +1,5 @@
+"""Model definitions and pricing for Claude API."""
+
 from typing import Dict, List, Tuple
 
 # Model definitions and pricing

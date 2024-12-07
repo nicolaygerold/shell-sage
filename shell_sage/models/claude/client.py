@@ -1,11 +1,13 @@
+"""Client for Claude API."""
+
 import logging
 from typing import Any, Dict, Iterator, List, Optional, Union
 
 from anthropic import Anthropic
 from anthropic.types import Message
 
-from .models import MODEL_TYPES, PRICING, TEXT_ONLY_MODELS
-from .types import ChatMessage, ChatRequest, ToolChoice, ToolResult, Usage
+from .models import MODEL_TYPES, TEXT_ONLY_MODELS
+from .types import ChatMessage, ChatRequest, Usage
 
 logger = logging.getLogger(__name__)
 
