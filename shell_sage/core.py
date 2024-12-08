@@ -5,18 +5,19 @@ import sys
 from dataclasses import dataclass
 from functools import partial
 from typing import List, Optional
+from pydantic import BaseModel
 
 import typer
 from rich.console import Console
 from rich.markdown import Markdown
 
-from .models.claude import MODEL_TYPES, Client, contents
+from .models.claude import MODEL_TYPES, Client, contents, mk_msg_anthropic
 from .pane import get_history
 from .prompts import sp, ssp
+from .config import save_api_key
 
 
-@dataclass
-class ShellSageConfig:
+class ShellSageConfig(BaseModel):
     """Configuration for ShellSage CLI"""
     code_theme: str = "monokai"
     code_lexer: str = "python"
@@ -94,7 +95,7 @@ app = typer.Typer(help="ShellSage - Your CLI Teaching Assistant")
 
 @app.command()
 def main(
-    query: List[str] = typer.Argument(..., help="The query to send to ShellSage"),
+    query: str = typer.Argument(..., help="The query to send to ShellSage"),
     pid: str = typer.Option("current", help="Tmux pane ID ('current', 'all', or specific ID)"),
     history_lines: int = typer.Option(200, "--lines", "-n", help="Number of history lines"),
     sassy: bool = typer.Option(False, "--sassy", "-s", help="Enable sassy mode"),
@@ -110,7 +111,6 @@ def main(
         sage = ShellSage(config)
 
         # Build context
-        query_text = " ".join(query)
         context_parts = []
 
         # Get tmux context
@@ -122,10 +122,10 @@ def main(
             context_parts.append(f"<context>\n{sys.stdin.read()}</context>")
 
         # Construct final query
-        full_query = "\n".join([*context_parts, f"<query>\n{query_text}\n</query>"])
+        full_query = "\n".join([*context_parts, f"<query>\n{query}\n</query>"])
 
         # Get and render response
-        response = sage.sss(full_query) if sassy else sage.ss(full_query)
+        response = sage.sss(mk_msg_anthropic(full_query)) if sassy else sage.ss(mk_msg_anthropic(full_query))
         sage.console.print(Markdown(
             contents(response),
             code_theme=config.code_theme,
@@ -136,6 +136,21 @@ def main(
     except Exception as e:
         logging.error(f"Error processing request: {e}")
         raise typer.Exit(code=1)
+
+# @app.command()
+# def setup(api_key: str = typer.Option(
+#     ...,
+#     prompt=True,
+#     hide_input=True,
+#     help="Your Anthropic API key"
+# )) -> None:
+#     """Configure ShellSage with your API key"""
+#     try:
+#         save_api_key(api_key)
+#         typer.echo("API key saved successfully!")
+#     except Exception as e:
+#         typer.echo(f"Failed to save API key: {e}", err=True)
+#         raise typer.Exit(1)
 
 if __name__ == "__main__":
     app()

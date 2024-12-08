@@ -14,12 +14,11 @@ class ToolChoice(BaseModel):
 class ChatRequest(BaseModel):
     """Complete chat request configuration"""
     model: str
-    messages: List[Message]
+    messages: List[dict[str, Any]]
     system: str = ""
     temperature: float = Field(ge=0, le=1, default=0)
     max_tokens: int = Field(ge=0, default=4096)
     tools: Optional[List[Dict[str, Any]]] = None
-    prefill: str = ""
     tool_choice: Optional[ToolChoice] = None
     stream: bool = False
 

@@ -23,3 +23,6 @@ dev-dependencies = [
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
+
+[project.scripts]
+shell-sage = "shell_sage.core:app"
