@@ -343,6 +343,7 @@ source = { editable = "." }
 dependencies = [
     { name = "aisuite" },
     { name = "anthropic" },
+    { name = "httpx" },
     { name = "openai" },
     { name = "rich" },
     { name = "typer" },
@@ -358,7 +359,8 @@ dev = [
 requires-dist = [
     { name = "aisuite", specifier = ">=0.1.6" },
     { name = "anthropic", specifier = ">=0.40.0" },
-    { name = "openai" },
+    { name = "httpx" },
+    { name = "openai", specifier = ">=1.57.0" },
     { name = "rich", specifier = ">=13.9.4" },
     { name = "typer", specifier = ">=0.15.1" },
 ]
