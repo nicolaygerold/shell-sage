@@ -2,19 +2,17 @@ import logging
 import os
 import subprocess
 import sys
-from dataclasses import dataclass
 from functools import partial
-from typing import List, Optional
+from typing import Optional
 from pydantic import BaseModel
 
 import typer
 from rich.console import Console
 from rich.markdown import Markdown
 
-from .models.claude import MODEL_TYPES, Client, contents, mk_msg_anthropic
+import aisuite as ai
 from .pane import get_history
-from .prompts import sp, ssp
-from .config import save_api_key
+from .prompts import sp as sage_prompt, ssp as sassy_sage_prompt
 
 
 class ShellSageConfig(BaseModel):
@@ -23,8 +21,29 @@ class ShellSageConfig(BaseModel):
     code_lexer: str = "python"
     default_history_lines: int = 200
     log_level: str = "INFO"
-    model: str = "claude-3-5-sonnet-20241022"  # Default to Sonnet
+    model: str = "anthropic:claude-3-5-sonnet-20241022"  # Default to Sonnet
     log_usage: bool = False
+
+def create_messages(query: str, system_prompt: str) -> list[dict[str, str]]:
+    """Create properly formatted messages for AI completion
+
+    Args:
+        query: The user's query with context
+        system_prompt: The system prompt template
+
+    Returns:
+        List of message dictionaries in the format expected by the AI client
+
+    Raises:
+        ValueError: If query or system_prompt is empty
+    """
+    if not query or not system_prompt:
+        raise ValueError("Query and system prompt cannot be empty")
+
+    return [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": query}
+    ]
 
 class ShellSage:
     def __init__(self, config: ShellSageConfig):
@@ -35,9 +54,6 @@ class ShellSage:
             ConnectionError: If Claude API connection fails
             ValueError: If invalid model specified
         """
-        if config.model not in MODEL_TYPES:
-            raise ValueError(f"Invalid model: {config.model}")
-
         self.config = config
         self.console = Console()
         self.setup_logging()
@@ -59,13 +75,12 @@ class ShellSage:
             ConnectionError: If Claude API connection fails
         """
         try:
-            self.client = Client(
-                model=self.config.model,
-                log_usage=self.config.log_usage
+            self.client = ai.Client(
+
             )
             try:
-                self.ss = partial(self._get_completion, system=sp)
-                self.sss = partial(self._get_completion, system=ssp)
+                self.ss = partial(self._get_completion, system=sage_prompt)
+                self.sss = partial(self._get_completion, system=sassy_sage_prompt)
             except NameError as e:
                 raise ImportError(f"Failed to load prompt templates: {e}")
         except Exception as e:
@@ -73,13 +88,13 @@ class ShellSage:
 
     def _get_completion(self, query: str, system: str) -> str:
         """Get completion from Claude with proper message formatting"""
-        messages = [{"role": "user", "content": query}]
-        response = self.client.get_completion(
+        messages = create_messages(query, system)
+        response = self.client.chat.completions.create(
+            model=self.config.model or "anthropic:claude-3-5-sonnet-20240620",
             messages=messages,
-            system=system,
             temperature=0.7
         )
-        return response.content[0].text
+        return response.choices[0].message.content
 
     def get_tmux_context(self, pid: str, n: int) -> Optional[str]:
         """Get tmux context safely with proper error handling"""
@@ -125,9 +140,9 @@ def main(
         full_query = "\n".join([*context_parts, f"<query>\n{query}\n</query>"])
 
         # Get and render response
-        response = sage.sss(mk_msg_anthropic(full_query)) if sassy else sage.ss(mk_msg_anthropic(full_query))
+        response = sage.sss(full_query) if sassy else sage.ss(full_query)
         sage.console.print(Markdown(
-            contents(response),
+            response,
             code_theme=config.code_theme,
             inline_code_lexer=config.code_lexer,
             inline_code_theme=config.code_theme
