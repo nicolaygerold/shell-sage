@@ -1,4 +1,3 @@
-
 AVAILABLE_PROVIDERS = {
     "anthropic": {
         "models": [
@@ -20,4 +19,16 @@ AVAILABLE_PROVIDERS = {
         ],
         "default": "gpt-4o-2024-11-20"
     }
+}
+
+MODEL_ALIASES = {
+    # Anthropic shortcuts
+    "sonnet": "anthropic:claude-3-5-sonnet-20241022",
+    "haiku": "anthropic:claude-3-5-haiku-20241022",
+    "opus": "anthropic:claude-3-opus-20240229",
+
+    # OpenAI shortcuts
+    "gpt4": "openai:gpt-4o-2024-11-20",
+    "gpt4-mini": "openai:gpt-4o-mini",
+    "o1": "openai:o1-preview",
 }

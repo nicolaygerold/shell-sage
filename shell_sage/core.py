@@ -13,6 +13,7 @@ from rich.markdown import Markdown
 import aisuite as ai
 from .pane import get_history
 from .prompts import sp as sage_prompt, ssp as sassy_sage_prompt
+from .providers import AVAILABLE_PROVIDERS, MODEL_ALIASES
 
 
 class ShellSageConfig(BaseModel):
@@ -23,6 +24,39 @@ class ShellSageConfig(BaseModel):
     log_level: str = "INFO"
     model: str = "anthropic:claude-3-5-sonnet-20241022"  # Default to Sonnet
     log_usage: bool = False
+
+    def _resolve_model_alias(self, model: str) -> str:
+        """Convert model alias to full model name if it exists"""
+        return MODEL_ALIASES.get(model, model)
+
+    @property
+    def provider(self) -> str:
+        """Extract provider from model string"""
+        resolved_model = self._resolve_model_alias(self.model)
+        return resolved_model.split(":")[0] if ":" in resolved_model else "anthropic"
+
+    def validate_model(self) -> None:
+        """Validate that the model exists for the provider"""
+        resolved_model = self._resolve_model_alias(self.model)
+        provider = self.provider
+
+        if provider not in AVAILABLE_PROVIDERS:
+            valid_aliases = ", ".join(MODEL_ALIASES.keys())
+            raise ValueError(
+                f"Unknown provider: {provider}\n"
+                f"Try using one of these shortcuts: {valid_aliases}"
+            )
+
+        model_name = resolved_model.split(":")[-1]
+        if model_name not in AVAILABLE_PROVIDERS[provider]["models"]:
+            valid_models = ", ".join(AVAILABLE_PROVIDERS[provider]["models"])
+            raise ValueError(
+                f"Unknown model {model_name} for provider {provider}\n"
+                f"Valid models are: {valid_models}"
+            )
+
+        # Update the model to its full form
+        self.model = resolved_model
 
 def create_messages(query: str, system_prompt: str) -> list[dict[str, str]]:
     """Create properly formatted messages for AI completion
@@ -116,13 +150,16 @@ def main(
     sassy: bool = typer.Option(False, "--sassy", "-s", help="Enable sassy mode"),
     theme: str = typer.Option("monokai", help="Code theme for responses"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
+    model: str = typer.Option(None, "--model", "-m", help="AI model to use (e.g., 'anthropic:claude-3-5-sonnet-20241022' or 'openai:gpt-4o')"),
 ) -> None:
     """ShellSage CLI - Get help with shell commands and system administration"""
     try:
         config = ShellSageConfig(
             code_theme=theme,
-            log_level="DEBUG" if verbose else "INFO"
+            log_level="DEBUG" if verbose else "WARNING",
+            model=model if model else ShellSageConfig().model
         )
+        config.validate_model()  # Validate the model before proceeding
         sage = ShellSage(config)
 
         # Build context
