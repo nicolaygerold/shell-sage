@@ -34,6 +34,11 @@ class ShellSage < Formula
       sha256 "a0588c0a7fa68a1978a069818657778f86abe6ff5ea6abf472f940a08bfe4f0a"
     end
 
+    resource "httpx" do
+      url "https://files.pythonhosted.org/packages/source/h/httpx/httpx-0.26.0.tar.gz"
+      sha256 "451b55c30d5185ea6b23c2c793abf9bb237d2a7dfb901ced6ff69ad37ec1dfaf"
+    end
+
     def install
       virtualenv_install_with_resources
     end
