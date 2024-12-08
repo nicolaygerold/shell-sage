@@ -1,6 +1,25 @@
 # ShellSage
 
-## Usage
+This is a fork of the original [ShellSage](https://github.com/AnswerDotAI/shell_sage) project.
+
+I have kept the original name, so people know it's an adaptation of the original ShellSage. I won't diverage from their vision of making it easier to learn shell commands, so I think it's fine. If any of the original authors have any issues with this, please let me know and I will change the name.
+
+You can install it directly from brew:
+
+```sh
+brew install nicolaygerold/shell-sage/shell_sage
+```
+
+I have adapted the original project a little bit to make it more understandable to me.
+
+I had no clue about a lot of the tools the original author used (e.g. they compiled the code from jupyter notebook to python).
+
+I have also added a few more features that I think are useful.
+- I added a model flag to easily switch between models of different providers.
+- I am thinking about adding a setup flow to make it easier to configure the CLI and set the environment variables.
+
+
+## Original ShellSage
 
 ### Installation
 
