@@ -3,8 +3,8 @@ class ShellSage < Formula
 
     desc "AI-powered shell commands in your terminal"
     homepage "https://github.com/nicolaygerold/homebrew-shell-sage"
-    url "https://github.com/nicolaygerold/homebrew-shell-sage/archive/refs/tags/v0.1.0.tar.gz"
-    sha256 "REPLACE_WITH_ACTUAL_SHA256"
+    url "https://github.com/nicolaygerold/homebrew-shell-sage/archive/refs/tags/v0.0.1.tar.gz"
+    sha256 "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed"
     license "Apache-2.0"
 
     depends_on "python@3.12"
