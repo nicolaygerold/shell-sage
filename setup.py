@@ -29,6 +29,7 @@ setup(
         "openai>=1.57.0",
         "rich>=13.9.4",
         "typer>=0.15.1",
+        "httpx>=0.28.1",
     ],
     extras_require={
         "dev": [
