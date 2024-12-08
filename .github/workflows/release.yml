@@ -1,0 +1,42 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get latest tag
+        id: get_latest_tag
+        run: |
+          # Get latest tag or default to v0.0.0 if none exists
+          git fetch --tags
+          LATEST_TAG=$(git tag -l "v0.0.*" | sort -V | tail -n 1 || echo "v0.0.0")
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+
+      - name: Calculate new version
+        id: calc_version
+        run: |
+          LATEST_TAG=${{ steps.get_latest_tag.outputs.latest_tag }}
+          # Extract patch number and increment
+          PATCH=$(echo $LATEST_TAG | grep -o '[0-9]*$')
+          NEW_PATCH=$((PATCH + 1))
+          NEW_VERSION="0.0.$NEW_PATCH"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release v${{ steps.calc_version.outputs.new_version }}
+          tag_name: v${{ steps.calc_version.outputs.new_version }}
+          generate_release_notes: true
+          draft: false
